@@ -14,7 +14,7 @@ body  {
     font: bold normal 36px Helvetica;
     width: 69%;
     margin: auto;
-    color: rgb(197 250 200);
+    color: rgb(121 202 124);
     padding: 0.8% 0.8%;
     border-bottom-style : solid;
 }
@@ -26,22 +26,22 @@ body  {
     margin: auto;
 }
 #temporizador {
-    background-color: rgb(90 167 94);
+    background-color: rgb(91 152 94);
     margin: 12%;
     padding: 12%;
-    border: solid 8px rgb(197 250 200);
+    border: solid 8px rgb(121 202 124);
     border-radius: 12px;
 }
 #temporizacion {
     font: bold normal 69px Helvetica;
-    color: rgb(28 50 100);
+    color: rgb(31 34 102);
 }
 #controles > button {
     font-size: 23px;
-    background: rgb(180 193 225);
+    background: rgb(121 124 202);
     padding: 9px;
-    color: rgb(28 50 100);
-    border: solid 1.75px rgb(77 97 143);
+    color: rgb(31 34 102);
+    border: solid 1.75px rgb(91 94 152);
     border-radius: 12px;
 }
 #contacto {
@@ -53,8 +53,8 @@ body  {
     width: 20%;
     text-align: center;
     font: bold italic 12px Helvetica;
-    color: rgb(197 250 200);
+    color: rgb(121 202 124);
 }
 #contacto > #autor > a {
-    color: rgb(90 167 94);
+    color: rgb(91 152 94);
 }
