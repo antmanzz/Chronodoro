@@ -32,6 +32,16 @@ body  {
     border: solid 8px rgb(121 202 124);
     border-radius: 12px;
 }
+#configuracion > label {
+    font: bold italic 13px Helvetica;
+    text-decoration: underline;
+    color: rgb(31 34 102)
+}
+#configuracion > input {
+    background-color: rgb(121 124 202);
+    font: bold normal 13px Helvetica;
+    color: rgb(31 34 102);
+}
 #temporizacion {
     font: bold normal 69px Helvetica;
     color: rgb(31 34 102);
@@ -43,6 +53,14 @@ body  {
     color: rgb(31 34 102);
     border: solid 1.75px rgb(91 94 152);
     border-radius: 12px;
+}
+#contador {
+    padding-top: 7%;
+    margin-top: 3.5%;
+}
+#contador > span {
+    font: bold normal 16px Helvetica;
+    color: rgb(31 34 102);
 }
 #contacto {
     display: block;
