@@ -210,9 +210,9 @@ function cambiar_iteracion_temporizador() {
 */
 document.addEventListener('DOMContentLoaded', function() {
     let dispositivo = new Dispositivo();
-    temporizador.dispositivo = dispositivo;
     let t_iteracion = dispositivo.leer_duracion_iteracion();
     dispositivo.preparar(t_iteracion, 0);
+    temporizador.dispositivo = dispositivo;
     temporizador.temporizacion = new Temporizacion(t_iteracion);
     document.getElementById('start').onclick = iniciar_temporizador;
     document.getElementById('pause').onclick = pausar_temporizador;
