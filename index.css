@@ -15,67 +15,120 @@ body  {
     width: 69%;
     margin: auto;
     color: rgb(121 202 124);
-    padding: 0.8% 0.8%;
+    padding: 0.8%;
     border-bottom-style : solid;
 }
-#pomodoro {
-    text-align: center;
-    display: block;
-    width: 36%;
-    height: 36%;
+#aplicaciones {
+    width: 50%;
+    height: 50%;
     margin: auto;
 }
-#temporizador {
-    background-color: rgb(91 152 94);
-    margin: 12%;
-    padding: 12%;
-    border: solid 8px rgb(121 202 124);
-    border-radius: 12px;
+#aplicaciones > #menu-aplicaciones {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
 }
-#configuracion > .entradas {
+#aplicaciones > #menu-aplicaciones > button {
+    margin-top: 2.4%;
+    font: bold normal 16px Helvetica;
+    color: rgb(121 202 124);
+    display: inline-block;
+    border: none;
+    border-radius: 8px;
+    background-color: rgb(91 152 94);
+    padding: 0.6%;
+    flex: 0;
+}
+#aplicaciones > #menu-aplicaciones > button:active {
+    margin-top: 2.4%;
+    font: bold normal 16px Helvetica;
+    color: rgb(121 202 124);
+    display: inline-block;
+    border: none;
+    border-radius: 8px;
+    background-color: rgb(121 152 124);
+    padding: 0.6%;
+    flex: 0;
+}
+#configuracion-aplicacion {
+    width: 50%;
+    height: 50%;
+    margin: auto;
+    margin-top: 1.6%;
+    padding: 1.6%;
+    border: solid 1.75px rgb(121 202 124);
+    border-radius: 8px;
+    background-color: rgb(91 152 94);
+}
+#configuracion-aplicacion > .entradas {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     flex: 1;
 }
-#configuracion > .entradas > label {
+#configuracion-aplicacion > .entradas > label {
     font: bold italic 13px Helvetica;
     text-decoration: underline;
-    color: rgb(31 34 102);
+    color: rgb(31 102 34);
     text-align: left;
     margin-top: 2%;
-    max-width: 75%;
 }
-#configuracion > .entradas > input {
-    background-color: rgb(121 124 202);
+#configuracion-aplicacion > .entradas > input {
+    background-color: rgb(121 202 124);
     font: bold normal 13px Helvetica;
     text-align: center;
-    color: rgb(31 34 102);
+    color: rgb(31 102 34);
     margin-top: 2%;
     max-width: 19%;
     min-width: 19%;
-    border-top: solid 1.75px rgb(31 34 102);
-    border-left: solid 1.75px rgb(31 34 102);
-    border-right: solid 1.75px rgb(121 124 202);
-    border-bottom: solid 1.75px rgb(121 124 202);
+    border-top: solid 1.75px rgb(31 102 34);
+    border-left: solid 1.75px rgb(31 102 34);
+    border-right: solid 1.75px rgb(121 202 124);
+    border-bottom: solid 1.75px rgb(121 202 124);
 }
-#configuracion > .entradas > input:focus {
-    background-color: rgb(91 94 152);
+#configuracion-aplicacion > .entradas > input:focus {
+    background-color: rgb(91 152 94);
     font: bold normal 13px Helvetica;
     text-align: center;
-    color: rgb(31 34 102);
+    color: rgb(31 102 34);
     margin-top: 2%;
     max-width: 19%;
     min-width: 19%;
+}
+#pomodoro {
+    text-align: center;
+    display: block;
+    width: 30%;
+    height: 36%;
+    margin: auto;
+}
+#temporizador {
+    background-color: rgb(91 152 94);
+    margin: 6%;
+    padding: 12%;
+    border: solid 8px rgb(121 202 124);
+    border-radius: 12px;
 }
 #temporizacion {
     font: bold normal 69px Helvetica;
     color: rgb(31 34 102);
 }
 #controles > button {
-    font-size: 23px;
+    font-size: 80%;
     background: rgb(121 124 202);
-    padding: 9px;
+    padding: 4%;
+    margin: 2% 0;
+    font-weight: bold;
+    color: rgb(31 34 102);
+    border: solid 1.75px rgb(91 94 152);
+    border-radius: 12px;
+}
+#controles > button:active {
+    font-size: 80%;
+    background: rgb(91 94 152);
+    padding: 4%;
+    margin: 2% 0;
+    font-weight: bold;
     color: rgb(31 34 102);
     border: solid 1.75px rgb(91 94 152);
     border-radius: 12px;

@@ -11,6 +11,7 @@
     <meta name="author" content="antmanzz">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="index.js"></script>
+    <script src="configuration-tools.js"></script>
 </head>
 
 <body>
@@ -18,28 +19,30 @@
         <h1>Pomodoro - mada faka</h1>
     </header>
     <nav id="aplicaciones">
-        <!-- No hay ccontroles de nivel de aplicación distintos al principal -->
+        <div id="menu-aplicaciones">
+            <button>Configuración</button>
+        </div>
+        <div id="configuracion-aplicacion" hidden>
+            <div class="entradas">
+                <label for="iteraciones-por-ciclo">Iteraciones por ciclo:</label>
+                <input type="number" id="iteraciones-por-ciclo" value="4" min="1"/>
+            </div>
+            <div class="entradas">
+                <label for="duracion-iteracion">Duración de iteración:</label>
+                <input type="number" id="duracion-iteracion" value="25" min="5" max="1440"/>
+            </div>
+            <div class="entradas">
+                <label for="duracion-descanso-iteracion">Duración de los descansos por iteración:</label>
+                <input type="number" id="duracion-descanso-iteracion" value="7" min="0" max="1440"/>
+            </div>
+            <div class="entradas">
+                <label for="duracion-descanso-ciclo">Duración de los descansos por ciclo:</label>
+                <input type="number" id="duracion-descanso-ciclo" value="20" min="0" max="1440"/>
+            </div>
+        </div>
     </nav>
     <main id="pomodoro">
         <section id="temporizador">
-            <nav id="configuracion">
-                <div class="entradas">
-                    <label for="iteraciones-por-ciclo">Iteraciones por ciclo:</label>
-                    <input type="number" id="iteraciones-por-ciclo" value="4" min="1">
-                </div>
-                <div class="entradas">
-                    <label for="duracion-iteracion">Duración de iteración:</label>
-                    <input type="number" id="duracion-iteracion" value="25" min="5" max="99">
-                </div>
-                <div class="entradas">
-                    <label for="duracion-descanso-iteracion">Duración de los descansos por iteración:</label>
-                    <input type="number" id="duracion-descanso-iteracion" value="7" min="0" max="99">
-                </div>
-                <div class="entradas">
-                    <label for="duracion-descanso-ciclo">Duración de los descansos por ciclo:</label>
-                    <input type="number" id="duracion-descanso-ciclo" value="20" min="0" max="99">
-                </div>
-            </nav>
             <div id="temporizacion">
                 <span id="minutero" class="reloj">00</span>
                 <span id="separador" class="reloj">:</span>
@@ -49,11 +52,12 @@
                 <button id="start">Start</button>
                 <button id="pause">Pause</button>
                 <button id="stop">Stop</button>
+                <button id="step">Step</button>
             </div>
             <footer id="contador">
-                <span id="iteracion">Iteración: 0</span>
-                <span id="ciclo">Ciclo: 0</span>
-                <span id="descanso">Descanso: no</span>
+                <span id="contador-iteraciones">Iteraciones: <span id="iteraciones">0</span></span>
+                <span id="contador-ciclos">Ciclos: <span id="ciclos">0</span></span>
+                <span id="estado-descanso">Descanso: <span id="descanso">no</span></span>
             </footer>
         </section>
     </main>
