@@ -207,6 +207,8 @@ function cambiar_iteracion_temporizador() {
 * Hilo de ejecución una vez cargada la página
 */
 document.addEventListener('DOMContentLoaded', function() {
+    let dispositivo = new Dispositivo();
+    temporizador.dispositivo = dispositivo;
     let entrada_duracion = document.getElementById('duracion-iteracion');
     let t_iteracion = entrada_duracion.value;
     temporizador.temporizacion = new Temporizacion(t_iteracion);
