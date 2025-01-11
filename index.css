@@ -37,6 +37,8 @@ body  {
     border-radius: 8px;
     background-color: rgb(91 152 94);
     padding: 0.6%;
+    margin-left: 0.3%;
+    margin-right: 0.3%;
     flex: 0;
 }
 #aplicaciones > #menu-aplicaciones > button:active {
@@ -46,7 +48,7 @@ body  {
     display: inline-block;
     border: none;
     border-radius: 8px;
-    background-color: rgb(121 152 124);
+    background-color: rgb(31 102 34);
     padding: 0.6%;
     flex: 0;
 }
@@ -94,6 +96,19 @@ body  {
     margin-top: 2%;
     max-width: 19%;
     min-width: 19%;
+}
+#estadisticas {
+    margin: 2.8%;
+}
+#registro, #registro > tr, th {
+    border: solid 1.75px rgb(121 202 124);
+    border-collapse: collapse;
+    background-color: rgb(31 102 34);
+    color: rgb(91 152 94);
+    font: bold italic 16px Helvetica; 
+    text-align: center;
+    margin: auto;
+    padding: 3px;
 }
 #pomodoro {
     text-align: center;

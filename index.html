@@ -20,9 +20,10 @@
     </header>
     <nav id="aplicaciones">
         <div id="menu-aplicaciones">
-            <button>Configuración</button>
+            <button id="herramienta-configuracion">Configuración</button>
+            <button id="herramienta-estadisticas">Estadísticas</button>
         </div>
-        <div id="configuracion-aplicacion" hidden>
+        <div id="configuracion-aplicacion" class="herramienta" hidden>
             <div class="entradas">
                 <label for="iteraciones-por-ciclo">Iteraciones por ciclo:</label>
                 <input type="number" id="iteraciones-por-ciclo" value="4" min="1"/>
@@ -39,6 +40,17 @@
                 <label for="duracion-descanso-ciclo">Duración de los descansos por ciclo:</label>
                 <input type="number" id="duracion-descanso-ciclo" value="20" min="0" max="1440"/>
             </div>
+        </div>
+        <div id="estadisticas" class="herramienta" hidden>
+            <table id="registro">
+                <tr>
+                    <th>Iteración</th>
+                    <th>Tiempo contado</th>
+                    <th>% de Tiempo</th>
+                    <th>Ciclo</th>
+                    <th>% de Ciclo</th>
+                </tr>
+            </table>
         </div>
     </nav>
     <main id="pomodoro">
