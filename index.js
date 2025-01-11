@@ -133,17 +133,19 @@ let temporizador = {
             let t_iteracion = this.temporizacion.t_iteracion;
             let minutero = this.dispositivo.leer_minutero();
             let cuenta_it = this.calcular_iteraciones(t_iteracion, minutero.valor);
-            //se actualiza el estado y procede al cambio
-            if(  this.iteracion < (duracion_ciclos - 1) ) { //si el número de iteraciones actuales no completan un ciclo
+            //actualizar estadísticas de sesión
+            this.iteracion++;
+            this.recorrido += cuenta_it;
+            let ciclos = this.dispositivo.leer_cuenta_ciclos();
+            let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido);
+            this.dispositivo.registrar_estadisticas(this.iteracion, t_iteracion - minutero.valor, cuenta_it,
+                Math.floor(ciclos) + 1, cuenta_ciclos);
+            //realizar cambio de estado
+            if(  (this.iteracion - 1) < (duracion_ciclos - 1) ) { //si el número de iteraciones actuales no completan un ciclo
                 let duracion_descanso_corto = this.dispositivo.leer_descanso_corto();
                 this.dispositivo.preparar(duracion_descanso_corto, 0);
                 let iteraciones = this.dispositivo.leer_cuenta_iteraciones();
                 this.dispositivo.actualizar_cuenta_iteraciones(iteraciones + cuenta_it)
-                this.iteracion++;
-                this.recorrido += cuenta_it;
-                let ciclos = this.dispositivo.leer_cuenta_ciclos() + 1;
-                this.dispositivo.registrar_estadisticas(this.iteracion, t_iteracion - minutero.valor, cuenta_it,
-                    Math.floor(ciclos), ciclos);
                 this.descanso = true;
                 this.dispositivo.actualizar_estado_descanso("Si");
                 this.temporizacion.t_iteracion = duracion_descanso_corto;
@@ -152,12 +154,7 @@ let temporizador = {
                 this.dispositivo.preparar(duracion_descanso_largo, 0);
                 let iteraciones = this.dispositivo.leer_cuenta_iteraciones();
                 this.dispositivo.actualizar_cuenta_iteraciones(iteraciones + cuenta_it);
-                this.recorrido += cuenta_it;
-                let ciclos = this.dispositivo.leer_cuenta_ciclos();
-                let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido);
                 this.dispositivo.actualizar_cuenta_ciclos(ciclos + cuenta_ciclos);
-                this.dispositivo.registrar_estadisticias(this.iteracion, t_iteracion - minutero.valor, cuenta_it,
-                    Math.floor(ciclos + cuenta_ciclos) + 1, ciclos + cuenta_ciclos + 1);
                 this.iteracion = 0;
                 this.recorrido = 0;
                 this.descanso = true;
@@ -186,12 +183,10 @@ let temporizador = {
         this.recorrido += cuenta_it;
         let duracion_ciclos = this.dispositivo.leer_longitud_ciclos();
         let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido);
-        //preparar la siguiente temporización
-        let duracion_iteracion = this.dispositivo.leer_duracion_iteracion();
-        this.dispositivo.preparar(duracion_iteracion, 0);
         //agregar estadísticas de la última iteración
+        let ciclos = this.dispositivo.leer_cuenta_ciclos();
         this.dispositivo.registrar_estadisticas(this.iteracion + 1, t_iteracion - minutero.valor, cuenta_it,
-            Math.floor(this.dispositivo.leer_cuenta_ciclos()) + 1, cuenta_ciclos);
+            Math.floor(ciclos) + 1, cuenta_ciclos);
         //actualiza el contador de iteraciones o el estado de descanso del temporizador
         if( !this.descanso ) { //si la iteración actual no es un descanso
             let iteraciones = this.dispositivo.leer_cuenta_iteraciones();
@@ -202,6 +197,9 @@ let temporizador = {
             this.descanso = false;
             this.dispositivo.actualizar_estado_descanso("No");
         }
+        //preparar la siguiente temporización
+        let duracion_iteracion = this.dispositivo.leer_duracion_iteracion();
+        this.dispositivo.preparar(duracion_iteracion, 0);
         this.iteracion = 0;
         this.recorrido = 0;
     },
