@@ -8,19 +8,19 @@ class Dispositivo {
     }
     leer_minutero() {
         let control_minutos = document.getElementById('minutero');
-        return { digitos: control_minutos.innerHTML.length, valor: parseInt(control_minutos.innerHTML) };
+        return parseInt(control_minutos.innerHTML); 
     }
     leer_segundero() {
         let control_segundos = document.getElementById('segundero');
         return parseInt(control_segundos.innerHTML);
     }
-    actualizar_minutero(minutero) {
+    actualizar_minutero(digitos, minutos) {
         let control_minutos = document.getElementById('minutero');
-        control_minutos.innerHTML = minutero.valor.toString().padStart(minutero.digitos, '0');
+        control_minutos.innerHTML = minutos.padStart(digitos, '0');
     }
-    actualizar_segundero(segundero) {
+    actualizar_segundero(segundos) {
         let control_segundos = document.getElementById('segundero');
-        control_segundos.innerHTML = segundero.toString().padStart(2, '0');
+        control_segundos.innerHTML = segundos.padStart(2, '0');
     }
     leer_longitud_ciclos() {
         let longitud_ciclos = document.getElementById('iteraciones-por-ciclo');
@@ -98,16 +98,36 @@ class Temporizacion {
     constructor(t_iteracion) {
         this.t_iteracion = t_iteracion;
     }
-    actualizar(minutero, segundero) {
-        if( --segundero < 0 ) {
-            segundero = 59;
-            if( --minutero.valor < 0 ) return { actualizado:false, minutero:minutero, segundero:segundero };
-            else {
-                return { actualizado: true, minutero:minutero, segundero:segundero };
-            }
+    actualizar(minutos, segundos) {
+        let minutero = this.obtener_secuencia(minutos);
+        let segundero = this.obtener_secuencia(segundos);
+        let excedido = segundero.decrementar();
+        if( excedido ) {
+            segundero.digito = 5;
+            excedido = minutero.decrementar();
+            if( excedido ) return { actualizado: false, minutero: minutero, segundero: segundero };
+            else return { actualizado: true, minutero: minutero, segundero: segundero };
         } else {
-            return { actualizado: true, minutero:minutero, segundero:segundero };
+            return { actualizado: true, minutero: minutero, segundero: segundero };
         }
+    }
+    obtener_secuencia(digitos) {
+        return { digito: parseInt(digitos[0]), secuencia: digitos.length > 1 ? this.obtener_secuencia(digitos.slice(1)) : undefined,
+            decrementar: function() {
+                if( this.secuencia == undefined && this.digito === 0 ) this.digito = 9;
+                else if( this.secuencia == undefined ) this.digito--;
+                else {
+                    let propagar = this.secuencia.decrementar();
+                    if( propagar && this.digito === 0 ) this.digito = 9;
+                    else if( propagar ) this.digito--;
+                }
+                return (this.digito === 9);
+            },
+            leer: function() {
+                if( this.secuencia == undefined ) return this.digito.toString();
+                else return this.digito.toString().concat(this.secuencia.leer());
+            }
+        };
     }
 }
 
@@ -116,6 +136,7 @@ let temporizador = {
     temporizacion: null, //propiedad que encapsula el objetivo del caso de uso del temporizador
     actividad: null, //propiedad que determina el estado de acción del temporizador
     iteracion: 0, //propiedad que sigue la cuenta de las iteraciones de un mismo ciclo
+    ciclo: 0, //propiedad que registra la cuenta de ciclos comprendidos por la sesión de caso de uso 
     recorrido: 0, //propiedad que sigue la cuenta de iteraciones efectivas de un mismo ciclo
     descanso: false, //propiedad que determina el estado de descanso o actividad del temporizador
     calcular_iteraciones: function(t_iteracion, minutero) {
@@ -132,14 +153,13 @@ let temporizador = {
             //calcular la fracción de tiempo recorrido 
             let t_iteracion = this.temporizacion.t_iteracion;
             let minutero = this.dispositivo.leer_minutero();
-            let cuenta_it = this.calcular_iteraciones(t_iteracion, minutero.valor);
+            let cuenta_it = this.calcular_iteraciones(t_iteracion, minutero);
             //actualizar estadísticas de sesión
             this.iteracion++;
             this.recorrido += cuenta_it;
-            let ciclos = this.dispositivo.leer_cuenta_ciclos();
             let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido);
-            this.dispositivo.registrar_estadisticas(this.iteracion, t_iteracion - minutero.valor, cuenta_it,
-                Math.floor(ciclos) + 1, cuenta_ciclos);
+            this.dispositivo.registrar_estadisticas(this.iteracion, t_iteracion - minutero, cuenta_it,
+                this.ciclo + 1, cuenta_ciclos);
             //realizar cambio de estado
             if(  (this.iteracion - 1) < (duracion_ciclos - 1) ) { //si el número de iteraciones actuales no completan un ciclo
                 let duracion_descanso_corto = this.dispositivo.leer_descanso_corto();
@@ -154,9 +174,11 @@ let temporizador = {
                 this.dispositivo.preparar(duracion_descanso_largo, 0);
                 let iteraciones = this.dispositivo.leer_cuenta_iteraciones();
                 this.dispositivo.actualizar_cuenta_iteraciones(iteraciones + cuenta_it);
+                let ciclos = this.dispositivo.leer_cuenta_ciclos();
                 this.dispositivo.actualizar_cuenta_ciclos(ciclos + cuenta_ciclos);
                 this.iteracion = 0;
                 this.recorrido = 0;
+                this.ciclo++;
                 this.descanso = true;
                 this.dispositivo.actualizar_estado_descanso("Si");
                 this.temporizacion.t_iteracion = duracion_descanso_largo;
@@ -178,15 +200,14 @@ let temporizador = {
         //calcular la fracción de tiempo recorrido no contabilizado aún, de iteración o descanso 
         let t_iteracion = this.temporizacion.t_iteracion;
         let minutero = this.dispositivo.leer_minutero();
-        let cuenta_it = this.calcular_iteraciones(t_iteracion, minutero.valor);
+        let cuenta_it = this.calcular_iteraciones(t_iteracion, minutero);
         //calcular la fracción de ciclos no contabilizados aún
         this.recorrido += cuenta_it;
         let duracion_ciclos = this.dispositivo.leer_longitud_ciclos();
         let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido);
         //agregar estadísticas de la última iteración
-        let ciclos = this.dispositivo.leer_cuenta_ciclos();
-        this.dispositivo.registrar_estadisticas(this.iteracion + 1, t_iteracion - minutero.valor, cuenta_it,
-            Math.floor(ciclos) + 1, cuenta_ciclos);
+        this.dispositivo.registrar_estadisticas(this.iteracion + 1, t_iteracion - minutero, cuenta_it,
+            this.ciclo + 1, cuenta_ciclos);
         //actualiza el contador de iteraciones o el estado de descanso del temporizador
         if( !this.descanso ) { //si la iteración actual no es un descanso
             let iteraciones = this.dispositivo.leer_cuenta_iteraciones();
@@ -202,19 +223,25 @@ let temporizador = {
         this.dispositivo.preparar(duracion_iteracion, 0);
         this.iteracion = 0;
         this.recorrido = 0;
+        this.ciclo++;
     },
     pause: function() {
         clearInterval(this.actividad);
     },
     start: function() {
         this.actividad = setInterval(() => {
-            let minutero = this.dispositivo.leer_minutero();
-            let segundero = this.dispositivo.leer_segundero();
-            let resultado = this.temporizacion.actualizar(minutero, segundero);
-            if( !resultado.actualizado ) this.next();
+            let minutos = this.dispositivo.leer_minutero().toString();
+            let digitos = minutos.length;
+            minutos = minutos.padStart(digitos, '0');
+            let segundos = this.dispositivo.leer_segundero().toString();
+            segundos = segundos.padStart(2, '0');
+            let tiempo = this.temporizacion.actualizar(minutos, segundos);
+            if( !tiempo.actualizado ) this.next();
             else {
-                this.dispositivo.actualizar_minutero(resultado.minutero);
-                this.dispositivo.actualizar_segundero(resultado.segundero);
+                minutos = tiempo.minutero.leer();
+                segundos = tiempo.segundero.leer();
+                this.dispositivo.actualizar_minutero(digitos, minutos);
+                this.dispositivo.actualizar_segundero(segundos);
             }
         }, 1000);
     }
