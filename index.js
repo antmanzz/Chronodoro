@@ -26,6 +26,10 @@ class Dispositivo {
         let longitud_ciclos = document.getElementById('iteraciones-por-ciclo');
         return longitud_ciclos.value;
     }
+    leer_duracion_iteracion() {
+        let duracion_iteracion = document.getElementById('duracion-iteracion');
+        return duracion_iteracion.value;
+    }
     leer_descanso_corto() {
         let entrada_descanso_corto = document.getElementById('duracion-descanso-iteracion');
         return entrada_descanso_corto.value;
@@ -34,16 +38,13 @@ class Dispositivo {
         let entrada_descanso_largo = document.getElementById('duracion-descanso-ciclo');
         return entrada_descanso_largo.value;
     }
-    leer_duracion_iteracion() {
-        let duracion_iteracion = document.getElementById('duracion-iteracion');
-        return duracion_iteracion.value;
-    }
     leer_cuenta_iteraciones() {
         let iteraciones = document.getElementById('iteraciones');
         return parseFloat(iteraciones.innerHTML);
     }
     actualizar_cuenta_iteraciones(iteraciones) {
         let cuenta_it = document.getElementById('iteraciones');
+        //iteraciones es de tipo BigNumber
         cuenta_it.innerHTML = iteraciones;
     }
     leer_cuenta_ciclos() {
@@ -52,16 +53,17 @@ class Dispositivo {
     }
     actualizar_cuenta_ciclos(ciclos) {
         let cuenta_ciclos = document.getElementById('ciclos');
+        //ciclos es de tipo BigNumber
         cuenta_ciclos.innerHTML = ciclos;
     }
     actualizar_estado_descanso(descanso) {
         let estado_descanso = document.getElementById('descanso');
         estado_descanso.innerHTML = descanso;
     }
-    registrar_estadisticas(iteracion, t_iteracion, cuenta_it, ciclo, cuenta_ciclo) {
+    registrar_estadisticas(iteracion, t_iteracion, t_transcurrido, cuenta_it, ciclo, cuenta_ciclo) {
         let tabla = document.getElementById('registro');
         let entrada = tabla.insertRow();
-        for( let i = 0; i < 5; i++) {
+        for( let i = 0; i < 6; i++) {
             let celda = entrada.insertCell(i);
             switch(i) {
                 case 0:
@@ -71,13 +73,18 @@ class Dispositivo {
                     celda.innerHTML = t_iteracion;
                     break;
                 case 2:
-                    celda.innerHTML = cuenta_it;
+                    celda.innerHTML = t_transcurrido;
                     break;
                 case 3:
-                    celda.innerHTML = ciclo;
+                    //castea automáticamente a String
+                    celda.innerHTML = new BigNumber(cuenta_it).times(100);
                     break;
                 case 4:
-                    celda.innerHTML = cuenta_ciclo;
+                    celda.innerHTML = ciclo;
+                    break;
+                case 5:
+                    //castea automáticamente a String
+                    celda.innerHTML = new BigNumber(cuenta_ciclo).times(100);
                     break;
             }
         }
@@ -85,18 +92,29 @@ class Dispositivo {
     mostrar_estadisticas() {
         let estadisticas = document.getElementById('estadisticas');
         if( estadisticas.hasAttribute('hidden') ) {
-            let herramientas = document.getElementsByClassName('herramientas');
+            let herramientas = document.getElementsByClassName('herramienta');
             for( let herramienta of herramientas ) {
                 if( !herramienta.hasAttribute('hidden') ) herramienta.setAttribute('hidden', '');
             }
             estadisticas.removeAttribute('hidden');
         } else estadisticas.setAttribute('hidden', '');
     }
+    mostrar_configuracion() {
+        let configuracion = document.getElementById('configuracion-aplicacion');
+        if( configuracion.hasAttribute('hidden') ) {
+            let herramientas = document.getElementsByClassName('herramienta');
+            for( let herramienta of herramientas ) {
+                if( !herramienta.hasAttribute('hidden') ) herramienta.setAttribute('hidden', '');
+            }
+            configuracion.removeAttribute('hidden');
+        } else configuracion.setAttribute('hidden', '');
+    }
 }
 
 class Temporizacion {
     constructor(t_iteracion) {
         this.t_iteracion = t_iteracion;
+        this.activo = false;
     }
     actualizar(minutos, segundos) {
         let minutero = this.obtener_secuencia(minutos);
@@ -139,13 +157,17 @@ let temporizador = {
     ciclo: 0, //propiedad que registra la cuenta de ciclos comprendidos por la sesión de caso de uso 
     recorrido: 0, //propiedad que sigue la cuenta de iteraciones efectivas de un mismo ciclo
     descanso: false, //propiedad que determina el estado de descanso o actividad del temporizador
-    calcular_iteraciones: function(t_iteracion, minutero) {
-        let cuenta_it = 1 - (minutero / t_iteracion);
-        return Math.round(cuenta_it * 100) / 100;
+    calcular_tiempo_transcurrido: function(t_iteracion, minutero, segundero) {
+        let t_transcurrido = t_iteracion - ((minutero * 60 + segundero) / 60);
+        return new BigNumber(t_transcurrido.toFixed(4));
+    },
+    calcular_iteraciones: function(t_iteracion, minutero, segundero) {
+        let cuenta_it = 1 - (minutero * 60 + segundero) / (t_iteracion * 60);
+        return new BigNumber(cuenta_it.toFixed(4));
     },
     calcular_ciclos: function(duracion_ciclos, recorrido) {
         let cuenta_ciclos = 1 - ((duracion_ciclos - recorrido) / duracion_ciclos);
-        return Math.round(cuenta_ciclos * 100) / 100;
+        return new BigNumber(cuenta_ciclos.toFixed(4));
     },
     next: function() {
         if( !this.descanso ) { //si la iteración actual no es de descanso
@@ -153,19 +175,22 @@ let temporizador = {
             //calcular la fracción de tiempo recorrido 
             let t_iteracion = this.temporizacion.t_iteracion;
             let minutero = this.dispositivo.leer_minutero();
-            let cuenta_it = this.calcular_iteraciones(t_iteracion, minutero);
+            let segundero = this.dispositivo.leer_segundero();
+            let t_transcurrido = this.calcular_tiempo_transcurrido(t_iteracion, minutero, segundero);
+            let cuenta_it = this.calcular_iteraciones(t_iteracion, minutero, segundero);
             //actualizar estadísticas de sesión
             this.iteracion++;
-            this.recorrido += cuenta_it;
+            //castear a Number cuenta_it porque es de tipo BigNumber
+            this.recorrido += Number(cuenta_it);
             let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido);
-            this.dispositivo.registrar_estadisticas(this.iteracion, t_iteracion - minutero, cuenta_it,
+            this.dispositivo.registrar_estadisticas(this.iteracion, t_iteracion, t_transcurrido, cuenta_it,
                 this.ciclo + 1, cuenta_ciclos);
             //realizar cambio de estado
-            if(  (this.iteracion - 1) < (duracion_ciclos - 1) ) { //si el número de iteraciones actuales no completan un ciclo
+            if( (this.iteracion - 1) < (duracion_ciclos - 1) ) { //si el número de iteraciones actuales no completan un ciclo
                 let duracion_descanso_corto = this.dispositivo.leer_descanso_corto();
                 this.dispositivo.preparar(duracion_descanso_corto, 0);
                 let iteraciones = this.dispositivo.leer_cuenta_iteraciones();
-                this.dispositivo.actualizar_cuenta_iteraciones(iteraciones + cuenta_it)
+                this.dispositivo.actualizar_cuenta_iteraciones(cuenta_it.plus(iteraciones));
                 this.descanso = true;
                 this.dispositivo.actualizar_estado_descanso("Si");
                 this.temporizacion.t_iteracion = duracion_descanso_corto;
@@ -173,9 +198,9 @@ let temporizador = {
                 let duracion_descanso_largo = this.dispositivo.leer_descanso_largo();
                 this.dispositivo.preparar(duracion_descanso_largo, 0);
                 let iteraciones = this.dispositivo.leer_cuenta_iteraciones();
-                this.dispositivo.actualizar_cuenta_iteraciones(iteraciones + cuenta_it);
+                this.dispositivo.actualizar_cuenta_iteraciones(cuenta_it.plus(iteraciones));
                 let ciclos = this.dispositivo.leer_cuenta_ciclos();
-                this.dispositivo.actualizar_cuenta_ciclos(ciclos + cuenta_ciclos);
+                this.dispositivo.actualizar_cuenta_ciclos(cuenta_ciclos.plus(ciclos));
                 this.iteracion = 0;
                 this.recorrido = 0;
                 this.ciclo++;
@@ -200,36 +225,43 @@ let temporizador = {
         //calcular la fracción de tiempo recorrido no contabilizado aún, de iteración o descanso 
         let t_iteracion = this.temporizacion.t_iteracion;
         let minutero = this.dispositivo.leer_minutero();
-        let cuenta_it = this.calcular_iteraciones(t_iteracion, minutero);
-        //calcular la fracción de ciclos no contabilizados aún
-        this.recorrido += cuenta_it;
-        let duracion_ciclos = this.dispositivo.leer_longitud_ciclos();
-        let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido);
-        //agregar estadísticas de la última iteración
-        this.dispositivo.registrar_estadisticas(this.iteracion + 1, t_iteracion - minutero, cuenta_it,
-            this.ciclo + 1, cuenta_ciclos);
+        let segundero = this.dispositivo.leer_segundero();
+        let t_transcurrido = this.calcular_tiempo_transcurrido(t_iteracion, minutero, segundero);
+        let cuenta_it = this.calcular_iteraciones(t_iteracion, minutero, segundero);
         //actualiza el contador de iteraciones o el estado de descanso del temporizador
         if( !this.descanso ) { //si la iteración actual no es un descanso
+            //calcular la fracción de ciclos no contabilizados aún
+            //castear a Number cuenta_it porque es de tipo BigNumber
+            this.recorrido += Number(cuenta_it);
+            let duracion_ciclos = this.dispositivo.leer_longitud_ciclos();
+            let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido);
+            //actualizar conteos de iteraciones y ciclos
             let iteraciones = this.dispositivo.leer_cuenta_iteraciones();
-            this.dispositivo.actualizar_cuenta_iteraciones(iteraciones + cuenta_it);
+            this.dispositivo.actualizar_cuenta_iteraciones(cuenta_it.plus(iteraciones));
             let ciclos = this.dispositivo.leer_cuenta_ciclos();
-            this.dispositivo.actualizar_cuenta_ciclos(ciclos + cuenta_ciclos);
+            this.dispositivo.actualizar_cuenta_ciclos(cuenta_ciclos.plus(ciclos));
+            //agregar estadísticas de la última iteración
+            this.dispositivo.registrar_estadisticas(this.iteracion + 1, t_iteracion, t_transcurrido, cuenta_it,
+                this.ciclo + 1, cuenta_ciclos);
         } else { //si la iteración actual es un descanso
             this.descanso = false;
             this.dispositivo.actualizar_estado_descanso("No");
         }
-        //preparar la siguiente temporización
+        //preparar el siguiente ciclo de temporización 
         let duracion_iteracion = this.dispositivo.leer_duracion_iteracion();
         this.dispositivo.preparar(duracion_iteracion, 0);
         this.iteracion = 0;
         this.recorrido = 0;
         this.ciclo++;
+        this.temporizacion.activo = false;
+        this.temporizacion.t_iteracion = duracion_iteracion;
     },
     pause: function() {
         clearInterval(this.actividad);
     },
     start: function() {
         this.actividad = setInterval(() => {
+            this.temporizacion.activo = true;
             let minutos = this.dispositivo.leer_minutero().toString();
             let digitos = minutos.length;
             minutos = minutos.padStart(digitos, '0');
@@ -244,6 +276,13 @@ let temporizador = {
                 this.dispositivo.actualizar_segundero(segundos);
             }
         }, 1000);
+    },
+    actualizar_temporizador: function() {
+        if( !this.temporizacion.activo ) {
+            let minutos = this.dispositivo.leer_duracion_iteracion();
+            this.dispositivo.preparar(minutos, 0);
+            this.temporizacion.t_iteracion = minutos;
+        }
     }
 }
 
@@ -289,4 +328,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('step').onclick = cambiar_iteracion_temporizador;
     //requisitos urps+
     document.getElementById('herramienta-estadisticas').onclick = dispositivo.mostrar_estadisticas.bind(dispositivo);
+    document.getElementById('herramienta-configuracion').onclick = dispositivo.mostrar_configuracion.bind(dispositivo);
+    document.getElementById('duracion-iteracion').onchange = temporizador.actualizar_temporizador.bind(temporizador);
 });
