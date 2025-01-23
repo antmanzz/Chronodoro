@@ -62,9 +62,10 @@ let temporizador = {
         let cuenta_it = 1 - (minutero * 60 + segundero) / (t_iteracion * 60);
         return new BigNumber(cuenta_it.toFixed(4));
     },
-    calcular_ciclos: function(duracion_ciclos, recorrido) {
-        let cuenta_ciclos = 1 - ((duracion_ciclos - recorrido) / duracion_ciclos);
-        return new BigNumber(cuenta_ciclos.toFixed(4));
+    calcular_ciclos: function(duracion_ciclos, recorrido, cuenta_it) {
+        let acumulado_ciclos = 1 - ((duracion_ciclos - recorrido) / duracion_ciclos);
+        let cuenta_ciclos = 1 - ((duracion_ciclos - cuenta_it) / duracion_ciclos);
+        return [new BigNumber(cuenta_ciclos.toFixed(4)), new BigNumber(acumulado_ciclos.toFixed(4))];
     },
     formato: function(entrada) {
         return entrada.toString();
@@ -82,15 +83,16 @@ let temporizador = {
             this.iteracion++;
             //castear a Number cuenta_it porque es de tipo BigNumber
             this.recorrido += Number(cuenta_it);
-            let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido);
+            let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido, cuenta_it);
+            console.log(cuenta_ciclos[0], cuenta_ciclos[1]);
             let estadisticas = { iteracion: this.iteracion, t_iteracion: t_iteracion, t_transcurrido: this.formato(t_transcurrido), 
-                cuenta_it: this.formato(cuenta_it), ciclo: this.ciclo + 1, cuenta_ciclos: this.formato(cuenta_ciclos) };
+                cuenta_it: this.formato(cuenta_it), ciclo: this.ciclo + 1, cuenta_ciclos: this.formato(cuenta_ciclos[1]) };
             self.postMessage({ mensaje: "reg_stats", contenido: estadisticas })
             //realizar cambio de estado
             let iteraciones = estado['iteraciones'];
             self.postMessage({ mensaje: "update_iterations_count", contenido: this.formato(cuenta_it.plus(iteraciones)) });
             let ciclos = estado['ciclos'];
-            self.postMessage({ mensaje: "update_cycles_count", contenido: this.formato(cuenta_ciclos.plus(ciclos)) });
+            self.postMessage({ mensaje: "update_cycles_count", contenido: this.formato(cuenta_ciclos[0].plus(ciclos)) });
             self.postMessage({ mensaje: "update_break_state", contenido: "Si" });
             if( (this.iteracion - 1) < (duracion_ciclos - 1) ) { //si el número de iteraciones actuales no completan un ciclo
                 let duracion_descanso_corto = estado['duracion_descanso_corto'];
@@ -134,15 +136,15 @@ let temporizador = {
             //castear a Number cuenta_it porque es de tipo BigNumber
             this.recorrido += Number(cuenta_it);
             let duracion_ciclos = estado['duracion_ciclos'];
-            let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido);
+            let cuenta_ciclos = this.calcular_ciclos(duracion_ciclos, this.recorrido, cuenta_it);
             //actualizar conteos de iteraciones y ciclos
             let iteraciones = estado['iteraciones'];
             self.postMessage({ mensaje: "update_iterations_count", contenido: this.formato(cuenta_it.plus(iteraciones)) });
             let ciclos = estado['ciclos'];
-            self.postMessage({ mensaje: "update_cycles_count", contenido: this.formato(cuenta_ciclos.plus(ciclos)) });
+            self.postMessage({ mensaje: "update_cycles_count", contenido: this.formato(cuenta_ciclos[0].plus(ciclos)) });
             //agregar estadísticas de la última iteración
             let estadisticas = { iteracion: this.iteracion + 1, t_iteracion: t_iteracion, t_transcurrido: this.formato(t_transcurrido),
-                cuenta_it: this.formato(cuenta_it), ciclo: this.ciclo + 1, cuenta_ciclos: this.formato(cuenta_ciclos) };
+                cuenta_it: this.formato(cuenta_it), ciclo: this.ciclo + 1, cuenta_ciclos: this.formato(cuenta_ciclos[1]) };
             self.postMessage({ mensaje: "reg_stats", contenido: estadisticas });
         } else { //si la iteración actual es un descanso
             this.descanso = false;
